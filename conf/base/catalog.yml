@@ -2,3 +2,37 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+campanhas:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/dados_campanha.xlsx
+  load_args:
+    sheet_name: dados_da_campanha
+
+metadados:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/dados_campanha.xlsx
+  load_args:
+    sheet_name: Metadados
+
+categorias:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/dados_campanha.xlsx
+  load_args:
+    sheet_name: depara_categoria
+
+categoria_detalhada:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/dados_campanha.xlsx
+  load_args:
+    sheet_name: Planilha8
+    header: Null
+    names: ["categoria_detalhada"]
+
+perfis:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/perfis.csv
+  save_args:
+    index: False
+    encoding: "utf-8"
+    lineterminator: "\n"

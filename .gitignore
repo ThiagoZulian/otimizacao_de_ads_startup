@@ -152,6 +152,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# vscode settings
+.vscode/
+
 # mkdocs documentation
 /site
 

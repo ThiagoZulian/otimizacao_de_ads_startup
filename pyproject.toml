@@ -1,23 +1,51 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
+# ============================
+# Projeto
+# Referência: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+#
+# Instale o pacote: python-dotenv
+# Mostrei como no README.md
+#
+# Os pontos de atenção estão comentados próximo das chaves, aqui só coloquei um
+# lembrete.
+#
+# Atenção: As versões do Python devem ser consistentes entre:
+#   - project.requires-python
+#   - tool.ruff.target-version
+#   - tool.pyright.pythonVersion
+#
+# Atenção: O nome do pacote principal deve ser consistente entre:
+#   - project.scripts
+#   - tool.ruff.lint.isort.known-first-party
+#   - A pasta dentro de 'src/'
+# ============================
 [project]
 requires-python = ">=3.9"
 name = "otimizacao_de_ads_para_startup"
 readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Thiago Zulian", email = "thiago.zulian@outlook.com" }]
 dynamic = ["version"]
 dependencies = [
     "ipython>=8.10",
     "jupyterlab>=3.0",
     "notebook",
-    "kedro~=1.0.0"
+    "kedro~=1.0.0",
+    "kedro-viz>=12.0.0",
+    "jupyter>=1.1.1",
+    "ipykernel>=6.30.1",
+    "openpyxl>=3.1.5",
+    "kedro-datasets[pandas]>=4.1.0",
+    "matplotlib>=3.9.4",
+    "seaborn>=0.13.2",
+    "unidecode>=1.4.0",
 ]
 
-[project.scripts]
-"otimizacao-de-ads-para-startup" = "otimizacao_de_ads_para_startup.__main__:main"
-
-[project.entry-points."kedro.hooks"]
+[project.urls]
+# Homepage = "https://www.otaviomiranda.com.br/" # mudar pro meu dominio assim que houver.
+# Documentation = "https://example.org"
+# Repository = "https://github.com/me/spam.git"
+# Issues = "https://github.com/me/spam/issues"
+# Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 docs = [
@@ -35,13 +63,35 @@ dev = [
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest~=7.2",
-    "ruff~=0.12.0"
+    "ruff~=0.12.0",
+    "pyright",
+    "pytest-xdist"
 ]
+
+[project.scripts]
+"otimizacao-de-ads-para-startup" = "otimizacao_de_ads_para_startup.__main__:main"
+# project1 = "otimizacao_de_ads_para_startup.my_module:run_from_script"
+
+[project.entry-points."kedro.hooks"]
+
+
+# ============================
+# Build e Setuptools
+# ============================
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Mapeia o diretório raiz de pacotes para 'src'.
+package-dir = { "" = "src" }
 
 [tool.setuptools.dynamic]
 version = {attr = "otimizacao_de_ads_para_startup.__version__"}
 
 [tool.setuptools.packages.find]
+# Informa ao setuptools para encontrar os pacotes dentro da pasta 'src'.
+# Essencial para a estrutura de layout com 'src/'.
 where = ["src"]
 namespaces = false
 
@@ -53,31 +103,120 @@ tools = "['Linting', 'Testing', 'Documentation', 'Data Structure']"
 example_pipeline = "False"
 source_dir = "src"
 
-[tool.pytest.ini_options]
-addopts = """
---cov-report term-missing \
---cov src/otimizacao_de_ads_para_startup -ra"""
-
 [tool.coverage.report]
 fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
+# ============================
+# Lint e formatação (Ruff)
+# ============================
 [tool.ruff.format]
 docstring-code-format = true
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
 
 [tool.ruff]
 line-length = 88
+target-version = "py313"
+fix = true
 show-fixes = true
+indent-width = 4
+exclude = ["venv", ".venv", "env", ".env", "node_modules", "__pycache__"]
 
 [tool.ruff.lint]
 select = [
-    "F",   # Pyflakes
-    "W",   # pycodestyle
-    "E",   # pycodestyle
-    "I",   # isort
-    "UP",  # pyupgrade
-    "PL",  # Pylint
-    "T201", # Print Statement
+    "ASYNC",
+    "A",
+    "ANN",
+    "B",
+    "BLE",
+    "C4",
+    "C90",
+    "COM",
+    "E",        # pycodestyle
+    "EM",
+    "ERA",
+    "EXE",
+    "F",        # Pyflakes
+    "FBT",
+    "FIX",
+    "I",        # isort
+    "ICN",
+    "ISC",
+    "PL",       # Pylint
+    "Q",
+    "RET",
+    "RSE",
+    "S",
+    "SIM",
+    "SLF",
+    "T10",
+    "T20",
+    "T201",     # Print Statement
+    "TC",
+    "TD",
+    "TRY",
+    "UP",       # pyupgrade
+    "W",        # pycodestyle
+    "YTT",
+    "RUF",
+    "N",
 ]
-ignore = ["E501"]  # Ruff format takes care of line-too-long
+ignore = [
+    # "T201",
+    "COM812",
+    "E501"      # Ruff format takes care of line-too-long
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN201", "S101"]
+"notebooks/*.ipynb" = ["F821", "T201"]
+
+[tool.ruff.lint.isort]
+# Ensina ao Ruff qual é o pacote principal do seu projeto.
+# Deve ser o mesmo nome da pasta dentro de 'src/'.
+known-first-party = ["otimizacao_de_ads_para_startup"]
+
+
+# ============================
+# Tipagem (Pyright)
+# ============================
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.13"
+include = ["src", 'tests']
+exclude = [
+    "**/venv",
+    "**/.venv",
+    "**/env",
+    "**/.env",
+    "**/node_modules",
+    "**/__pycache__",
+]
+venv = ".venv"
+venvPath = "."
+executionEnvironments = [{ root = "src" }]
+# reportUnknownParameterType = false
+# reportUnknownArgumentType = false
+# reportUnknownLambdaType = false
+# reportUnknownVariableType = false
+# reportUnknownMemberType = false
+
+# ============================
+# Testes (Pytest)
+# ============================
+[tool.pytest.ini_options]
+# Adiciona 'src' ao path do Python durante os testes. Isso permite que
+# os testes em `tests/` importem os módulos de `src/` sem erros.
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = """
+--cov-report term-missing \
+--cov src/otimizacao_de_ads_para_startup -ra \
+-s --color=yes --tb=short"""
+
+# ============================
+[tool.kedro_telemetry]
+project_id = "72dd57b55544447abaf344c40d0656f4"
