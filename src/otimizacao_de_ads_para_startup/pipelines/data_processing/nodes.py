@@ -19,6 +19,7 @@ def preprocess_campanha(df: pd.DataFrame) -> pd.DataFrame:
         columns={
             "qte_de_impressões": "impressoes",
             "qte_de_clicks": "cliques",
+            "sexo": "genero",
             "valor_investido_no_anúncio": "custo",
             "Qte_de_Vendas_após_Clique": "vendas",
         }
@@ -48,7 +49,7 @@ def process_df_perfil(
     df_campanha_merged["perfil"] = (
         df_campanha_merged["faixa_etaria"].astype(str)
         + " | "
-        + df_campanha_merged["sexo"].astype(str)
+        + df_campanha_merged["genero"].astype(str)
         + " | "
         + df_campanha_merged["categoria_de_interesse"].astype(str)
     )
@@ -57,7 +58,7 @@ def process_df_perfil(
         df_campanha_merged.groupby(
             [
                 "faixa_etaria",
-                "sexo",
+                "genero",
                 "categoria_de_interesse",
                 "descricao_da_categoria",
                 "perfil",
@@ -68,7 +69,7 @@ def process_df_perfil(
         .reset_index()
     )
 
-    valor_venda = 85
+    valor_venda = 85.00
 
     # Receita total gerada pelas vendas
     df_perfil["faturamento"] = df_perfil["vendas"] * valor_venda
