@@ -43,19 +43,39 @@ def process_df_perfil(
         df_categoria, how="left", on="categoria_de_interesse"
     )
 
-    df_campanha_merged["categoria_de_interesse"] = df_campanha_merged[
-        "categoria_de_interesse"
-    ].astype("category")
+    df_campanha_merged = df_campanha_merged.astype(
+        {
+            "campanha": "category",
+            "faixa_etaria": "category",
+            "genero": "category",
+            "categoria_de_interesse": "category",
+            "descricao_da_categoria": "category",
+        }
+    )
+
     df_campanha_merged["perfil"] = (
         df_campanha_merged["faixa_etaria"].astype(str)
         + " | "
         + df_campanha_merged["genero"].astype(str)
         + " | "
         + df_campanha_merged["categoria_de_interesse"].astype(str)
-    )
+    ).astype("category")
 
     df_perfil = (
-        df_campanha_merged.groupby(
+        df_campanha_merged[
+            [
+                "perfil",
+                "faixa_etaria",
+                "genero",
+                "categoria_de_interesse",
+                "descricao_da_categoria",
+                "impressoes",
+                "cliques",
+                "custo",
+                "vendas",
+            ]
+        ]
+        .groupby(
             [
                 "faixa_etaria",
                 "genero",
@@ -65,32 +85,23 @@ def process_df_perfil(
             ],
             observed=True,
         )
-        .agg({"impressoes": "sum", "cliques": "sum", "custo": "sum", "vendas": "sum"})
+        .agg("sum")
         .reset_index()
     )
 
     valor_venda = 85.00
 
-    # Receita total gerada pelas vendas
     df_perfil["faturamento"] = df_perfil["vendas"] * valor_venda
-    # Lucro líquido = receita - custo do anúncio
     df_perfil["lucro"] = df_perfil["faturamento"] - df_perfil["custo"]
-    # Click Through Rate (%) = % de impressões que geraram clique
     df_perfil["ctr"] = df_perfil["cliques"] / df_perfil["impressoes"]
-    # Taxa de conversão (%) = % de cliques que geraram venda
     df_perfil["tc"] = df_perfil["vendas"] / df_perfil["cliques"]
-    # Custo por clique médio
     df_perfil["cpc"] = df_perfil["custo"] / df_perfil["cliques"]
-    # Custo por conversão (venda)
     df_perfil["cc"] = df_perfil["custo"] / df_perfil["vendas"]
-    # Retorno sobre investimento (%) = lucro / custo * 100
     df_perfil["roi"] = (df_perfil["faturamento"] - df_perfil["custo"]) / df_perfil[
         "custo"
     ]
-    # Taxa de conversão por impressão
     df_perfil["conversao"] = df_perfil["vendas"] / df_perfil["impressoes"]
 
-    # substituir inf por NaN
     df_perfil["cc"] = df_perfil["cc"].replace([np.inf, -np.inf], np.nan)
 
     return df_perfil
